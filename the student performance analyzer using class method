@@ -1,0 +1,104 @@
+class Student:
+    def __init__(self, name, subjects_marks):
+        self.name = name
+        self.subjects_marks = subjects_marks
+        self.total = sum(subjects_marks.values())
+        self.average = self.total / len(subjects_marks)
+        self.grade = self.calculate_grade()
+
+    def calculate_grade(self):
+        if self.average >= 90:
+            return "Excellent"
+        elif self.average >= 75:
+            return "Good"
+        elif self.average >= 50:
+            return "Average"
+        elif self.average >= 35:
+            return "Poor"
+        else:
+            return "Fail"
+
+    def get_data(self):
+        return {
+            "name": self.name,
+            "subjects": self.subjects_marks,
+            "total": self.total,
+            "average": self.average,
+            "grade": self.grade
+        }
+
+    def display_report(self):
+        print(f"\nReport Card - {self.name}")
+        for subject, mark in self.subjects_marks.items():
+            print(f"{subject}: {mark}")
+        print(f"Total: {self.total}")
+        print(f"Average: {self.average:.2f}")
+        print(f"Grade: {self.grade}")
+
+class School:
+    def __init__(self, subject_list):
+        self.classes = {}
+        self.subjects = subject_list
+
+    def add_class(self, class_name):
+        if class_name not in self.classes:
+            self.classes[class_name] = {"students": []}
+
+    def add_student_to_class(self, class_name):
+        name = input("Enter student name: ")
+        marks = {}
+        for sub in self.subjects:
+            while True:
+                try:
+                    m = int(input(f"Enter marks for {sub}: "))
+                    if 0 <= m <= 100:
+                        marks[sub] = m
+                        break
+                    else:
+                        print("Marks must be between 0 and 100.")
+                except ValueError:
+                    print("Invalid input. Enter numbers only.")
+        student = Student(name, marks)
+        self.classes[class_name]["students"].append(student)
+
+    def display_class_leaderboard(self, class_name):
+        students = self.classes[class_name]["students"]
+        ranked = sorted(students, key=lambda s: s.total, reverse=True)
+        print(f"\nLeaderboard for {class_name}")
+        print(f"{'Rank':<6}{'Name':<12}{'Total':<10}{'Average':<10}")
+        print("-" * 40)
+        for i, s in enumerate(ranked, start=1):
+            print(f"{i:<6}{s.name:<12}{s.total:<10}{s.average:<10.2f}")
+
+        for s in ranked:
+            s.display_report()
+
+    def export_all_data(self):
+        full_school_data = {}
+        for class_name, data in self.classes.items():
+            full_school_data[class_name] = {
+                "students": [s.get_data() for s in data["students"]]
+            }
+        return full_school_data
+
+def main():
+    subjects = ["Tamil", "English", "Maths", "Science", "Social"]
+    school = School(subjects)
+
+    num_classes = int(input("How many classes? "))
+    for _ in range(num_classes):
+        class_name = input("Enter class name (e.g., class_10A): ")
+        school.add_class(class_name)
+        num_students = int(input(f"How many students in {class_name}? "))
+        for _ in range(num_students):
+            school.add_student_to_class(class_name)
+
+    for class_name in school.classes:
+        school.display_class_leaderboard(class_name)
+
+    nested_data = school.export_all_data()
+    print("\nNested School Data Structure:")
+    print(nested_data)
+
+if __name__ == "__main__":
+    main()
